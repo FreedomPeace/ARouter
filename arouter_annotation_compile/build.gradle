@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation "com.google.auto.service:auto-service:1.0-rc4"
-    compile 'com.squareup:javapoet:1.8.0'
+    compile 'com.squareup:javapoet:1.7.0'
     implementation project(path: ':arouter_annotation')
 
     compile 'org.apache.commons:commons-lang3:3.4'
