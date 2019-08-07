@@ -4,6 +4,7 @@ package com.example.arouter_annotation_compile;
 import com.example.arouter_annotation.BindPath;
 import com.example.arouter_annotation_compile.utils.Logger;
 import com.google.auto.service.AutoService;
+import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -12,9 +13,12 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +36,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 
+import static com.example.arouter_annotation_compile.utils.Consts.KEY_MODULE_NAME;
 import static com.example.arouter_annotation_compile.utils.Consts.METHOD_LOAD_INTO;
 import static com.example.arouter_annotation_compile.utils.Consts.NAME_OF_GROUP;
 import static com.example.arouter_annotation_compile.utils.Consts.PACKAGE_OF_GENERATE_FILE;
@@ -46,6 +51,7 @@ public class RouteProcessor extends AbstractProcessor {
     private Logger logger;
     private Types typeUtil;
     private Elements elementUtil;
+    private String moduleName;
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
@@ -119,7 +125,28 @@ public class RouteProcessor extends AbstractProcessor {
             logger.info(">>> Found routes, size is 0 ");
         }
     }
-
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> supportAnnotations = new HashSet<>();
+        supportAnnotations.add(BindPath.class.getCanonicalName());     // This annotation mark class which can be router.
+        return supportAnnotations;
+    }
+    /**
+     * If the processor class is annotated with {@link
+     * SupportedSourceVersion}, return the source version in the
+     * annotation.  If the class is not so annotated, {@link
+     * SourceVersion#RELEASE_6} is returned.
+     *
+     * @return the latest source version supported by this processor
+     */
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+    @Override
+    public Set<String> getSupportedOptions() {
+        return Sets.newHashSet(KEY_MODULE_NAME);
+    }
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
@@ -127,5 +154,27 @@ public class RouteProcessor extends AbstractProcessor {
         typeUtil = processingEnv.getTypeUtils();            // Get type utils.
         elementUtil = processingEnv.getElementUtils();
         logger = new Logger(processingEnvironment.getMessager());
+
+        // Attempt to get user configuration [moduleName]
+        Map<String, String> options = processingEnv.getOptions();
+        if (MapUtils.isNotEmpty(options)) {
+            moduleName = options.get(KEY_MODULE_NAME);
+        }
+
+        if (StringUtils.isNotEmpty(moduleName)) {
+            moduleName = moduleName.replaceAll("[^0-9a-zA-Z_]+", "");
+
+            logger.info("The user has configuration the module name, it was [" + moduleName + "]");
+        } else {
+            logger.error("These no module name, at 'build.gradle', like :\n" +
+                    "apt {\n" +
+                    "    arguments {\n" +
+                    "        moduleName project.getName();\n" +
+                    "    }\n" +
+                    "}\n");
+            throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
+        }
+
+        logger.info(">>> RouteProcessor init. <<<");
     }
 }
