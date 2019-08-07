@@ -14,6 +14,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,10 +23,14 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.JavaFileObject;
 
 import static com.example.arouter_annotation_compile.utils.Consts.METHOD_LOAD_INTO;
 import static com.example.arouter_annotation_compile.utils.Consts.NAME_OF_GROUP;
@@ -34,6 +39,8 @@ import static com.example.arouter_annotation_compile.utils.Consts.WARNING_TIPS;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 @AutoService(Processor.class)
+//@SupportedSourceVersion(SourceVersion.RELEASE_7)
+//@SupportedAnnotationTypes("com.example.arouter.IRouteGroup")
 public class RouteProcessor extends AbstractProcessor {
     private Filer mFiler;       // File util, write class file into disk.
     private Logger logger;
@@ -46,11 +53,12 @@ public class RouteProcessor extends AbstractProcessor {
         Set<? extends Element> routeElements = roundEnvironment.getElementsAnnotatedWith(BindPath.class);
         try {
             this.parseRoutes(routeElements);
-            return true;
+            parseResult = true;
         } catch (IOException e) {
-            logger.error(e);
+            // Note: calling e.printStackTrace() will print IO errors
+            // that occur from the file already existing after its first run, this is normal
         }
-        return false;
+        return parseResult;
     }
 
     private void parseRoutes(Set<? extends Element> routeElements) throws IOException {
@@ -86,7 +94,7 @@ public class RouteProcessor extends AbstractProcessor {
                     .addParameter(groupParamSpec);
 
             for (Element routeElement : routeElements) {
-                TypeElement  typeElement = (TypeElement) routeElement;
+                TypeElement typeElement = (TypeElement) routeElement;
                 BindPath annotation = typeElement.getAnnotation(BindPath.class);
                 /**
                  *
@@ -107,6 +115,8 @@ public class RouteProcessor extends AbstractProcessor {
                                 .build()
                 ).build().writeTo(mFiler);
             }
+        } else {
+            logger.info(">>> Found routes, size is 0 ");
         }
     }
 
