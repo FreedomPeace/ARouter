@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion 23
@@ -30,5 +31,5 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:23.+'
     compile project(path: ':arouter_annotation')
-    annotationProcessor project(path: ':arouter_annotation_compile')
+    apt project(path: ':arouter_annotation_compile')
 }
