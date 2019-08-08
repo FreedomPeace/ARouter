@@ -111,7 +111,7 @@ public class RouteProcessor extends AbstractProcessor {
                         typeElement.getQualifiedName());
 
                 // Generate groups
-                String groupFileName = NAME_OF_GROUP + annotation.value();
+                String groupFileName = NAME_OF_GROUP ;
                 JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                         TypeSpec.classBuilder(groupFileName)
                                 .addJavadoc(WARNING_TIPS)
