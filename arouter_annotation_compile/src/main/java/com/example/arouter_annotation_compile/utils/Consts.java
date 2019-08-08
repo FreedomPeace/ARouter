@@ -23,13 +23,6 @@ public class Consts {
     public static final String STRING = "java.lang.String";
 
     // Custom interface
-    public static final String IPROVIDER = "com.alibaba.android.arouter.facade.template.IProvider";
-    public static final String IPROVIDER_GROUP = "com.alibaba.android.arouter.facade.template.IProviderGroup";
-
-    public static final String IINTERCEPTOR = "com.alibaba.android.arouter.facade.template.IInterceptor";
-    public static final String IINTERCEPTOR_GROUP = "com.alibaba.android.arouter.facade.template.IInterceptorGroup";
-
-    public static final String ITROUTE_ROOT = "com.alibaba.android.arouter.facade.template.IRouteRoot";
     public static final String IROUTE_GROUP = "com.example.arouter_api.template.IRouteGroup";
 
     // Log
