@@ -2,6 +2,7 @@ package com.example.arouter_annotation_compile;
 
 
 import com.example.arouter_annotation.BindPath;
+import com.example.arouter_annotation_compile.utils.Consts;
 import com.example.arouter_annotation_compile.utils.Logger;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
@@ -70,7 +71,7 @@ public class RouteProcessor extends AbstractProcessor {
     private void parseRoutes(Set<? extends Element> routeElements) throws IOException {
         if (CollectionUtils.isNotEmpty(routeElements)) {
             logger.info(">>> Found routes, size is " + routeElements.size() + " <<<");
-            TypeElement type_IRouteGroup = elementUtil.getTypeElement("com.example.arouter.IRouteGroup");
+            TypeElement type_IRouteGroup = elementUtil.getTypeElement(Consts.IROUTE_GROUP);
 
 
             /**     Map<String,String> altas

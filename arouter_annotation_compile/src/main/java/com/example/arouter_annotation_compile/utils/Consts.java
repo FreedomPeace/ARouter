@@ -30,7 +30,7 @@ public class Consts {
     public static final String IINTERCEPTOR_GROUP = "com.alibaba.android.arouter.facade.template.IInterceptorGroup";
 
     public static final String ITROUTE_ROOT = "com.alibaba.android.arouter.facade.template.IRouteRoot";
-    public static final String IROUTE_GROUP = "com.alibaba.android.arouter.facade.template.IRouteGroup";
+    public static final String IROUTE_GROUP = "com.example.arouter_api.template.IRouteGroup";
 
     // Log
     public static final String PREFIX_OF_LOGGER = "ARouter::Compiler ";
