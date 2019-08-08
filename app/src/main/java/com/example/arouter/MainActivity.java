@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.arouter_annotation.BindPath;
-import com.example.arouter_api.launcher.AzpRouter;
+import com.example.arouter_api.launcher.ARouter;
 
 @BindPath("main/main")
 public class MainActivity extends AppCompatActivity {
@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void jumpToLogin(View view) {
-        AzpRouter.getInstance(getApplication()).build("login/login");
+        ARouter.init(getApplication());
+        ARouter.getInstance().build("login/login");
     }
 }

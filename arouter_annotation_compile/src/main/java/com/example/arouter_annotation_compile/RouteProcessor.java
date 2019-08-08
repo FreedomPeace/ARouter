@@ -18,7 +18,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,14 +27,12 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import javax.tools.JavaFileObject;
 
 import static com.example.arouter_annotation_compile.utils.Consts.KEY_MODULE_NAME;
 import static com.example.arouter_annotation_compile.utils.Consts.METHOD_LOAD_INTO;
@@ -112,7 +109,7 @@ public class RouteProcessor extends AbstractProcessor {
                         typeElement.getQualifiedName());
 
                 // Generate groups
-                String groupFileName = NAME_OF_GROUP ;
+                String groupFileName = NAME_OF_GROUP +System.currentTimeMillis();
                 JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                         TypeSpec.classBuilder(groupFileName)
                                 .addJavadoc(WARNING_TIPS)

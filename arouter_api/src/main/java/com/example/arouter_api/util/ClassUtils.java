@@ -81,9 +81,14 @@ public class ClassUtils {
     public static List<String> getSourcePaths(Context context) throws PackageManager.NameNotFoundException, IOException {
         ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
         File sourceApk = new File(applicationInfo.sourceDir);
-
         List<String> sourcePaths = new ArrayList<>();
-        sourcePaths.add(applicationInfo.sourceDir); //add the default apk path
+        File parentFile = sourceApk.getParentFile();
+        File[] list = parentFile.listFiles();
+        for (File s : list) {
+            if (s.getAbsolutePath().endsWith(".apk")) {
+                sourcePaths.add(s.getAbsolutePath());
+            }
+        }
 
         //the prefix of extracted file, ie: test.classes
         String extractedFilePrefix = sourceApk.getName() + EXTRACTED_NAME_EXT;
