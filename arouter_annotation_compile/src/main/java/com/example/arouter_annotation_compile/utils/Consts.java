@@ -46,6 +46,6 @@ public class Consts {
     public static final String NAME_OF_PROVIDER = "ARouter$$Providers";
     public static final String NAME_OF_GROUP = "ARouter$$Group$$";
     public static final String NAME_OF_INTERCEPTOR = "ARouter$$Interceptors";
-    public static final String PACKAGE_OF_GENERATE_FILE = "com.alibaba.android.arouter.routes";
+    public static final String PACKAGE_OF_GENERATE_FILE = "com.azp.android.arouter.routes";
     public static final String SOURCE_FILE_FOLDER_NAME = File.separator + "src" + File.separator + "main" + File.separator + "java";
 }
