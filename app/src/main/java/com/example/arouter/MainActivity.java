@@ -1,11 +1,11 @@
 package com.example.arouter;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 import com.example.arouter_annotation.BindPath;
+import com.example.arouter_api.launcher.AzpRouter;
 
 @BindPath("main/main")
 public class MainActivity extends AppCompatActivity {

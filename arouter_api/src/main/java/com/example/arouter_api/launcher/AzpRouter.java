@@ -1,7 +1,6 @@
-package com.example.arouter;
+package com.example.arouter_api.launcher;
 
 import android.content.Context;
-import android.content.Intent;
 
 import java.util.HashMap;
 

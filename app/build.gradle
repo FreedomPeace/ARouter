@@ -31,6 +31,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.+'
     compile project(':arouter_annotation')
+    compile project(':arouter_api')
     apt project(':arouter_annotation_compile')
 }
 apt {
