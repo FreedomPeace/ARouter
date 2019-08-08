@@ -26,7 +26,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.+'
-    compile 'com.android.support.constraint:constraint-layout:1.1.3'
     compile project(':arouter_annotation')
     annotationProcessor project(':arouter_annotation_compile')
 }
