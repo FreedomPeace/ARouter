@@ -30,6 +30,14 @@ public class RouteMeta {
         this.elementType = elementType;
     }
 
+    public Class<?> getDestination() {
+        return destination;
+    }
+
+    public void setDestination(Class<?> destination) {
+        this.destination = destination;
+    }
+
     public TypeElement getElementType() {
         return elementType;
     }
