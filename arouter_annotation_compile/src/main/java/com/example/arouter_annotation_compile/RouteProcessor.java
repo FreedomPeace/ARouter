@@ -13,6 +13,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -41,7 +42,9 @@ import javax.lang.model.util.Types;
 import static com.example.arouter_annotation_compile.utils.Consts.KEY_MODULE_NAME;
 import static com.example.arouter_annotation_compile.utils.Consts.METHOD_LOAD_INTO;
 import static com.example.arouter_annotation_compile.utils.Consts.NAME_OF_GROUP;
+import static com.example.arouter_annotation_compile.utils.Consts.NAME_OF_ROOT;
 import static com.example.arouter_annotation_compile.utils.Consts.PACKAGE_OF_GENERATE_FILE;
+import static com.example.arouter_annotation_compile.utils.Consts.SEPARATOR;
 import static com.example.arouter_annotation_compile.utils.Consts.WARNING_TIPS;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -54,7 +57,7 @@ public class RouteProcessor extends AbstractProcessor {
     private Types typeUtil;
     private Elements elementUtil;
     private String moduleName;
-    private Map<String ,Class<?>> rootMap;
+    private Map<String ,String> rootMap = new HashMap<>();
     private Map<String ,Set<RouteMeta>> groupMap;
 
     @Override
@@ -75,8 +78,22 @@ public class RouteProcessor extends AbstractProcessor {
         if (CollectionUtils.isNotEmpty(routeElements)) {
             logger.info(">>> Found routes, size is " + routeElements.size() + " <<<");
             TypeElement type_IRouteGroup = elementUtil.getTypeElement(Consts.IROUTE_GROUP);
+            TypeElement type_IROUTE_ROOT = elementUtil.getTypeElement(Consts.IROUTE_ROOT);
 
+            /**     Map<String,Class<? extends IRouteGroup> > routes
+             *  Build input type, format as :
+             *
+             *  Map<String,Class<? extends IRouteGroup> >
+             */
+            ParameterizedTypeName inputMapTypeOfRoot = ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    ClassName.get(String.class),
+                    ParameterizedTypeName.get(
+                            ClassName.get(Class.class),
+                            WildcardTypeName.subtypeOf(ClassName.get(type_IRouteGroup))
+                    )
 
+            );
             /**     Map<String,RouteMeta> atlas
              *  Build input type, format as :
              *
@@ -94,6 +111,7 @@ public class RouteProcessor extends AbstractProcessor {
              * Build input param name.
              *      "atlas"
              */
+            ParameterSpec rootParamSpec = ParameterSpec.builder(inputMapTypeOfRoot, "routes").build();
             ParameterSpec groupParamSpec = ParameterSpec.builder(inputMapTypeOfGroup, "atlas").build();
 
             groupMap.clear();
@@ -113,7 +131,7 @@ public class RouteProcessor extends AbstractProcessor {
 
             }
 
-            //generate file
+            //generate groups file
             Set<Map.Entry<String, Set<RouteMeta>>> entries = groupMap.entrySet();
             for (Map.Entry<String, Set<RouteMeta>> entry : entries) {
                 String group = entry.getKey();
@@ -147,7 +165,31 @@ public class RouteProcessor extends AbstractProcessor {
                                 .addMethod(loadInfoMethodOfGroupBuilder.build())
                                 .build()
                 ).build().writeTo(mFiler);
+                rootMap.put(group, groupFileName);
             }
+            //generate root file
+            MethodSpec.Builder loadInfoMethodOfRootBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
+                    .addAnnotation(Override.class)
+                    .addModifiers(PUBLIC)
+                    .addParameter(rootParamSpec);
+            for (Map.Entry<String, String> entry : rootMap.entrySet()) {
+                String group = entry.getKey();
+                loadInfoMethodOfRootBuilder.addStatement(
+                        "routes.put($S,$T.class)",
+                        group,
+                        ClassName.get(PACKAGE_OF_GENERATE_FILE,entry.getValue())
+                );
+            }
+            String rootFileName = NAME_OF_ROOT+ SEPARATOR+moduleName;
+
+            JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
+                    TypeSpec.classBuilder(rootFileName)
+                            .addJavadoc(WARNING_TIPS)
+                            .addSuperinterface(ClassName.get(type_IROUTE_ROOT))
+                            .addModifiers(PUBLIC)
+                            .addMethod(loadInfoMethodOfRootBuilder.build())
+                            .build()
+            ).build().writeTo(mFiler);
 
         } else {
             logger.info(">>> Found routes, size is 0 ");

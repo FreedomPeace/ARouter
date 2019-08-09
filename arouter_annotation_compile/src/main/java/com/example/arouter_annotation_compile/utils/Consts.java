@@ -24,6 +24,7 @@ public class Consts {
 
     // Custom interface
     public static final String IROUTE_GROUP = "com.example.arouter_api.template.IRouteGroup";
+    public static final String IROUTE_ROOT = "com.example.arouter_api.template.IRouterRoot";
 
     // Log
     public static final String PREFIX_OF_LOGGER = "ARouter::Compiler ";
