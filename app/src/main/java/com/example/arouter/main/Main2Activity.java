@@ -4,9 +4,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.example.arouter_annotation.BindPath;
+import com.example.arouter_annotation.Route;
 
-@BindPath("/main/main2")
+@Route(path = "/main/main2")
 public class Main2Activity extends AppCompatActivity {
 
     @Override

@@ -5,10 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.example.arouter.R;
-import com.example.arouter_annotation.BindPath;
+import com.example.arouter_annotation.Route;
 import com.example.arouter_api.launcher.ARouter;
 
-@BindPath("/main/main")
+@Route(path = "/main/main")
 public class MainActivity extends AppCompatActivity {
 
     @Override

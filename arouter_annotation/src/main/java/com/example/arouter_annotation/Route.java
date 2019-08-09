@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface BindPath {
-    String value();
+public @interface Route {
+    String path();
+    String group() default "";
 }

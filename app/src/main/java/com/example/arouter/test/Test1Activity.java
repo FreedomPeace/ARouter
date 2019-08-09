@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.arouter.R;
-import com.example.arouter_annotation.BindPath;
+import com.example.arouter_annotation.Route;
 
-@BindPath("/test/test1")
+@Route(path = "/test/test1")
 public class Test1Activity extends AppCompatActivity {
 
     @Override

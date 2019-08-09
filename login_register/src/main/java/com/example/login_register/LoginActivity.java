@@ -3,9 +3,9 @@ package com.example.login_register;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.example.arouter_annotation.BindPath;
+import com.example.arouter_annotation.Route;
 
-@BindPath("/login/login")
+@Route(path = "/login/login")
 public class LoginActivity extends AppCompatActivity {
 
     @Override

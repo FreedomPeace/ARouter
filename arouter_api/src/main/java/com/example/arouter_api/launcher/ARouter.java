@@ -7,14 +7,10 @@ import android.text.TextUtils;
 
 import com.example.arouter_api.exception.InitException;
 import com.example.arouter_api.template.ILogger;
-import com.example.arouter_api.template.IRouteGroup;
-import com.example.arouter_api.util.ClassUtils;
 import com.example.arouter_api.util.DefaultLogger;
 
 import java.util.HashMap;
-import java.util.List;
 
-import static com.example.arouter_api.util.Consts.ROUTE_ROOT_PAKCAGE;
 import static com.example.arouter_api.util.Consts.TAG;
 
 
@@ -35,12 +31,12 @@ public class ARouter {
         mContext = context;
         logger = new DefaultLogger(TAG);
         try {
-            List<String> classFileNames = ClassUtils.getFileNameByPackageName(context, ROUTE_ROOT_PAKCAGE);
-            for (String classFileName : classFileNames) {
-                Class<?> aClass = Class.forName(classFileName);
-                IRouteGroup iRouteGroup = (IRouteGroup) aClass.newInstance();
-                iRouteGroup.putActivitys(activitys);
-            }
+//            List<String> classFileNames = ClassUtils.getFileNameByPackageName(context, ROUTE_ROOT_PAKCAGE);
+//            for (String classFileName : classFileNames) {
+//                Class<?> aClass = Class.forName(classFileName);
+//                IRouteGroup iRouteGroup = (IRouteGroup) aClass.newInstance();
+//                iRouteGroup.loadInfo(activitys);
+//            }
             hasInit = true;
         } catch (Exception e) {
             logger.error(ILogger.defaultTag,e.getMessage());

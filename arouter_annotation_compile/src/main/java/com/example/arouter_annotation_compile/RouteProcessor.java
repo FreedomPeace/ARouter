@@ -1,7 +1,8 @@
 package com.example.arouter_annotation_compile;
 
 
-import com.example.arouter_annotation.BindPath;
+import com.example.arouter_annotation.Route;
+import com.example.arouter_annotation.bean.RouteMeta;
 import com.example.arouter_annotation_compile.utils.Consts;
 import com.example.arouter_annotation_compile.utils.Logger;
 import com.google.auto.service.AutoService;
@@ -18,9 +19,12 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -50,11 +54,13 @@ public class RouteProcessor extends AbstractProcessor {
     private Types typeUtil;
     private Elements elementUtil;
     private String moduleName;
+    private Map<String ,Class<?>> rootMap;
+    private Map<String ,Set<RouteMeta>> groupMap;
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         boolean parseResult = false;
-        Set<? extends Element> routeElements = roundEnvironment.getElementsAnnotatedWith(BindPath.class);
+        Set<? extends Element> routeElements = roundEnvironment.getElementsAnnotatedWith(Route.class);
         try {
             this.parseRoutes(routeElements);
             parseResult = true;
@@ -71,15 +77,15 @@ public class RouteProcessor extends AbstractProcessor {
             TypeElement type_IRouteGroup = elementUtil.getTypeElement(Consts.IROUTE_GROUP);
 
 
-            /**     Map<String,String> altas
+            /**     Map<String,RouteMeta> atlas
              *  Build input type, format as :
              *
-             *  ```Map<String, String>```
+             *  ```Map<String, RouteMeta>```
              */
-            ParameterizedTypeName inputMapTypeOfRoot = ParameterizedTypeName.get(
+            ParameterizedTypeName inputMapTypeOfGroup = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
                     ClassName.get(String.class),
-                    ClassName.get(String.class)
+                    ClassName.get(RouteMeta.class)
 
             );
 
@@ -88,44 +94,124 @@ public class RouteProcessor extends AbstractProcessor {
              * Build input param name.
              *      "atlas"
              */
-            ParameterSpec groupParamSpec = ParameterSpec.builder(inputMapTypeOfRoot, "atlas").build();
-            /**
-             * Build method : 'putActivitys'
-             */
-            MethodSpec.Builder putActivitysMethodOfRootBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
-                    .addAnnotation(Override.class)
-                    .addModifiers(PUBLIC)
-                    .addParameter(groupParamSpec);
-            //Build group method body
+            ParameterSpec groupParamSpec = ParameterSpec.builder(inputMapTypeOfGroup, "atlas").build();
+
+            groupMap.clear();
+            //给注解的所有元素分组
             for (Element routeElement : routeElements) {
-                TypeElement typeElement = (TypeElement) routeElement;
-                BindPath annotation = typeElement.getAnnotation(BindPath.class);
-                /**
-                 *
-                 */
-                putActivitysMethodOfRootBuilder.addStatement(
-                        "atlas.put($S,$S)",
-                        annotation.value(),
-                        typeElement.getQualifiedName());
+                TypeElement typeElement = (TypeElement) routeElement;//todo 有可能添加注解的不是类哦
+                Route route = null;
+                try {
+//                    route = routeElement.asType().getAnnotation(Route.class);//route报出null
+                    route = typeElement.getAnnotation(Route.class);
+                    RouteMeta routeMeta = new RouteMeta(route, typeElement);
+                    categories(routeMeta);
+                } catch (Exception e) {
+                    logger.info(">>> Found routes, size is " + routeElements.size() + " <<<"+e.getMessage());
+                    e.printStackTrace();
+                }
+
             }
-            // Generate groups
-            String groupFileName = NAME_OF_GROUP +System.currentTimeMillis();
-            JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
-                    TypeSpec.classBuilder(groupFileName)
-                            .addJavadoc(WARNING_TIPS)
-                            .addSuperinterface(ClassName.get(type_IRouteGroup))
-                            .addModifiers(PUBLIC)
-                            .addMethod(putActivitysMethodOfRootBuilder.build())
-                            .build()
-            ).build().writeTo(mFiler);
+
+            //generate file
+            Set<Map.Entry<String, Set<RouteMeta>>> entries = groupMap.entrySet();
+            for (Map.Entry<String, Set<RouteMeta>> entry : entries) {
+                String group = entry.getKey();
+                Set<RouteMeta> metas = entry.getValue();
+                /**
+                 * Build method : 'loadInfo'
+                 */
+                MethodSpec.Builder loadInfoMethodOfGroupBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
+                        .addAnnotation(Override.class)
+                        .addModifiers(PUBLIC)
+                        .addParameter(groupParamSpec);
+                //Build group method body
+                for (RouteMeta meta : metas) {
+
+                    loadInfoMethodOfGroupBuilder.addStatement(
+                            "atlas.put($S,$T.build($S, $S, $T.class))",
+                            meta.getPath(),
+                            ClassName.get(RouteMeta.class),
+                            meta.getPath(),
+                            meta.getGroup(),
+                            meta.getElementType()
+                            );
+                }
+                // Generate groups
+                String groupFileName = NAME_OF_GROUP + group;
+                JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
+                        TypeSpec.classBuilder(groupFileName)
+                                .addJavadoc(WARNING_TIPS)
+                                .addSuperinterface(ClassName.get(type_IRouteGroup))
+                                .addModifiers(PUBLIC)
+                                .addMethod(loadInfoMethodOfGroupBuilder.build())
+                                .build()
+                ).build().writeTo(mFiler);
+            }
+
         } else {
             logger.info(">>> Found routes, size is 0 ");
         }
     }
+
+    /**
+     * sort in group
+     * @param routeMeta
+     */
+    private void categories(RouteMeta routeMeta) {
+        if (verityRouteMeta(routeMeta)) {
+            logger.info("categories is start , group is " + routeMeta.getGroup()+" >>>path:"+routeMeta.getPath());
+            Set<RouteMeta> routeMetas = groupMap.get(routeMeta.getGroup());
+            if (CollectionUtils.isEmpty(routeMetas)) {
+                routeMetas = new TreeSet<RouteMeta>(new Comparator<RouteMeta>() {
+                    @Override
+                    public int compare(RouteMeta routeMeta, RouteMeta t1) {
+                        return routeMeta.getPath().compareTo(t1.getPath());
+                    }
+                });
+                routeMetas.add(routeMeta);
+                groupMap.put(routeMeta.getGroup(), routeMetas);
+            } else {
+                routeMetas.add(routeMeta);
+            }
+        } else {
+            logger.warning("route meta verify group failed , group is" + routeMeta.getGroup());
+        }
+
+    }
+
+    /**
+     * Verify the route meta
+     *
+     * @param routeMeta raw meta
+     */
+    private boolean verityRouteMeta(RouteMeta routeMeta) {
+        String path = routeMeta.getPath();
+        if (StringUtils.isEmpty(path)||!path.startsWith("/")) {
+            return false;
+        }
+        String group = routeMeta.getGroup();
+        if (StringUtils.isEmpty(group)) {
+            try {
+                //使用默认的group（path的第一个单词）
+                group = path.substring(1, path.indexOf("/", 1));
+                if (StringUtils.isEmpty(group)) {
+                    return false;
+                }
+                routeMeta.setGroup(group);
+                return true;
+            } catch (NullPointerException e) {
+                logger.info("extract group failed" + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> supportAnnotations = new HashSet<>();
-        supportAnnotations.add(BindPath.class.getCanonicalName());     // This annotation mark class which can be router.
+        supportAnnotations.add(Route.class.getCanonicalName());     // This annotation mark class which can be router.
         return supportAnnotations;
     }
     /**
@@ -151,6 +237,7 @@ public class RouteProcessor extends AbstractProcessor {
         typeUtil = processingEnv.getTypeUtils();            // Get type utils.
         elementUtil = processingEnv.getElementUtils();
         logger = new Logger(processingEnvironment.getMessager());
+        groupMap = new HashMap<>();
 
         // Attempt to get user configuration [moduleName]
         Map<String, String> options = processingEnv.getOptions();
