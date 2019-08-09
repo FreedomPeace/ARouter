@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.example.arouter_annotation.BindPath;
 
-@BindPath("login/login")
+@BindPath("/login/login")
 public class LoginActivity extends AppCompatActivity {
 
     @Override

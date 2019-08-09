@@ -1,13 +1,14 @@
-package com.example.arouter;
+package com.example.arouter.main;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.example.arouter.R;
 import com.example.arouter_annotation.BindPath;
 import com.example.arouter_api.launcher.ARouter;
 
-@BindPath("main/main")
+@BindPath("/main/main")
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -18,6 +19,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void jumpToLogin(View view) {
         ARouter.init(getApplication());
-        ARouter.getInstance().build("login/login");
+        ARouter.getInstance().build("/login/login");
     }
 }

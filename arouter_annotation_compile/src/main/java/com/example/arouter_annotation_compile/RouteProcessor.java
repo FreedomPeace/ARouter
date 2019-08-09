@@ -96,7 +96,7 @@ public class RouteProcessor extends AbstractProcessor {
                     .addAnnotation(Override.class)
                     .addModifiers(PUBLIC)
                     .addParameter(groupParamSpec);
-
+            //Build group method body
             for (Element routeElement : routeElements) {
                 TypeElement typeElement = (TypeElement) routeElement;
                 BindPath annotation = typeElement.getAnnotation(BindPath.class);
@@ -107,18 +107,17 @@ public class RouteProcessor extends AbstractProcessor {
                         "atlas.put($S,$S)",
                         annotation.value(),
                         typeElement.getQualifiedName());
-
-                // Generate groups
-                String groupFileName = NAME_OF_GROUP +System.currentTimeMillis();
-                JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
-                        TypeSpec.classBuilder(groupFileName)
-                                .addJavadoc(WARNING_TIPS)
-                                .addSuperinterface(ClassName.get(type_IRouteGroup))
-                                .addModifiers(PUBLIC)
-                                .addMethod(putActivitysMethodOfRootBuilder.build())
-                                .build()
-                ).build().writeTo(mFiler);
             }
+            // Generate groups
+            String groupFileName = NAME_OF_GROUP +System.currentTimeMillis();
+            JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
+                    TypeSpec.classBuilder(groupFileName)
+                            .addJavadoc(WARNING_TIPS)
+                            .addSuperinterface(ClassName.get(type_IRouteGroup))
+                            .addModifiers(PUBLIC)
+                            .addMethod(putActivitysMethodOfRootBuilder.build())
+                            .build()
+            ).build().writeTo(mFiler);
         } else {
             logger.info(">>> Found routes, size is 0 ");
         }

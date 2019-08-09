@@ -13,9 +13,9 @@ import com.example.arouter_api.template.ILogger;
  */
 public class DefaultLogger implements ILogger {
 
-    private static boolean isShowLog = false;
-    private static boolean isShowStackTrace = false;
-    private static boolean isMonitorMode = false;
+    private static boolean isShowLog = true;
+    private static boolean isShowStackTrace = true;
+    private static boolean isMonitorMode = true;
 
     private String defaultTag = "ARouter";
 
