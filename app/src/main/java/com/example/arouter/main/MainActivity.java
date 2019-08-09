@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void jumpToLogin(View view) {
-        ARouter.init(getApplication());
         ARouter.getInstance().build("/login/login");
     }
 }
