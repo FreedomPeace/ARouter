@@ -1,8 +1,9 @@
 package com.example.arouter.main;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.arouter.R;
 import com.example.arouter_annotation.Route;
