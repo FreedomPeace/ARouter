@@ -16,6 +16,7 @@ android {
         javaCompileOptions{
             annotationProcessorOptions{
                 arguments =[moduleName:project.getName()]
+                classNames =["com.example.arouter_annotation_compile.RouteProcessor"]
             }
         }
     }
